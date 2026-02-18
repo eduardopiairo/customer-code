@@ -14,9 +14,9 @@ def health():
 @app.route("/api/v1/details", methods=["GET"])
 def details():
     return jsonify({
-        "name": "stakeholder-management-backend",
+        "name": "customer-code-api",
         "version": "1.0.0",
-        "description": "Stakeholder Management API",
+        "description": "Customer Code API",
         "time": datetime.now(timezone.utc).isoformat(),
         "hostname": socket.gethostname()
     })

@@ -1,5 +1,5 @@
 # stakeholder-management-backend
-Stakeholer Management API
+Customer Code API
 
 ## Setup
 
@@ -25,4 +25,18 @@ venv\Scripts\activate
 
 ```bash
 deactivate
+```
+
+## Docker
+
+### Build the image
+
+```bash
+docker build -t customer-code-api .
+```
+
+### Run the container
+
+```bash
+docker run -p 5000:5000 costumer-code-api
 ```
