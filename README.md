@@ -1,5 +1,5 @@
 # stakeholder-management-backend
-Customer Code API
+Customer relations management API for the pharmaceutical and skin care industry.
 
 ## Setup
 
@@ -38,5 +38,5 @@ docker build -t customer-code-api .
 ### Run the container
 
 ```bash
-docker run -p 5000:5000 costumer-code-api
+docker run -p 8080:5000 customer-code-api
 ```
