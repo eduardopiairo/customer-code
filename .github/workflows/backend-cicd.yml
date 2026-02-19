@@ -27,44 +27,35 @@ jobs:
         with:
           args: check backend/src
 
-  # test:
-  #   name: Test
-  #   runs-on: ubuntu-latest
+  test:
+    name: Test
+    runs-on: ubuntu-latest
 
-  #   services:
-  #     postgres:
-  #       image: postgres:16-alpine
-  #       env:
-  #         POSTGRES_DB: pharmacies
-  #         POSTGRES_USER: appuser
-  #         POSTGRES_PASSWORD: apppassword
-  #       ports:
-  #         - 5432:5432
-  #       options: >-
-  #         --health-cmd pg_isready
-  #         --health-interval 5s
-  #         --health-timeout 3s
-  #         --health-retries 5
+    env:
+      DATABASE_URL: sqlite:///:memory:
 
-  #   env:
-  #     DATABASE_URL: postgresql://appuser:apppassword@localhost:5432/pharmacies
+    steps:
+      - uses: actions/checkout@v4
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
 
-  #     - name: Set up Python 3.12
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.12"
-  #         cache: pip
+      - name: Install dependencies
+        working-directory: backend
+        run: pip install -r requirements-dev.txt
 
-  #     - name: Install dependencies
-  #       working-directory: backend
-  #       run: pip install -r requirements.txt
+      - name: Run unit tests with coverage
+        working-directory: backend
+        run: pytest --cov=src --cov-report=xml --tb=short
 
-  #     - name: Run tests
-  #       working-directory: backend
-  #       run: pytest --tb=short
+      - name: Upload coverage to Codacy
+        uses: codacy/codacy-coverage-reporter-action@v1
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: backend/coverage.xml
 
   security:
     name: Security
