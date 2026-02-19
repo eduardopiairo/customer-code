@@ -62,6 +62,26 @@ The API will be available at `http://localhost:5000`.
 | PUT | `/api/v1/stores/<id>` | Update a store |
 | DELETE | `/api/v1/stores/<id>` | Delete a store |
 
+## Testing
+
+Install dev dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Run unit tests:
+
+```bash
+pytest --tb=short
+```
+
+Run with coverage report:
+
+```bash
+pytest --cov=src --cov-report=term-missing --tb=short
+```
+
 ## Linting
 
 Install dev dependencies:
@@ -83,12 +103,6 @@ ruff check src --fix
 ```
 
 ## Security
-
-Install dev dependencies (if not already done):
-
-```bash
-pip install -r requirements-dev.txt
-```
 
 Scan source code for security issues:
 
