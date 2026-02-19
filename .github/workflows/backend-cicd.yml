@@ -8,9 +8,10 @@ on:
     - fix/*
     paths:
       - "backend/**"
-      - ".github/workflows/backend.yml"
+      - ".github/workflows/backend-cicd.yml"
   pull_request:
-    branches: [main]
+    branches: 
+    - main
     paths:
       - "backend/**"
 
