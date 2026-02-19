@@ -62,6 +62,46 @@ The API will be available at `http://localhost:5000`.
 | PUT | `/api/v1/stores/<id>` | Update a store |
 | DELETE | `/api/v1/stores/<id>` | Delete a store |
 
+## Linting
+
+Install dev dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Check for lint errors:
+
+```bash
+ruff check src
+```
+
+Auto-fix fixable issues:
+
+```bash
+ruff check src --fix
+```
+
+## Security
+
+Install dev dependencies (if not already done):
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Scan source code for security issues:
+
+```bash
+bandit -r src
+```
+
+Check dependencies for known CVEs:
+
+```bash
+pip-audit -r requirements.txt
+```
+
 ## Run with Docker Compose (full stack)
 
 From the **project root**:
