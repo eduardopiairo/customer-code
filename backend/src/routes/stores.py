@@ -21,7 +21,9 @@ def create_store():
     name    = (data.get("name") or "").strip()
     address = (data.get("address") or "").strip()
     if not name or not address:
-        return jsonify({"error": "Fields 'name' and 'address' are required"}), 422
+        return jsonify(
+            {"error": "Fields 'name' and 'address' are required"}
+        ), 422
 
     store = Store(
         name    = name,
