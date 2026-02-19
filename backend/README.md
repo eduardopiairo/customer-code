@@ -116,6 +116,25 @@ Check dependencies for known CVEs:
 pip-audit -r requirements.txt
 ```
 
+## Codacy
+
+This project uses [Codacy](https://www.codacy.com/) for automated code quality and static analysis.
+
+Codacy analyses every pull request and reports on code style issues, duplication, complexity, and security patterns. The Codacy badge on the repository reflects the current grade of the `main` branch.
+
+To view results, open the Codacy dashboard for this repository. No local setup is required — analysis runs automatically via the Codacy GitHub integration on each push and pull request.
+
+## Dependabot
+
+[Dependabot](https://docs.github.com/en/code-security/dependabot) is enabled on this repository to keep dependencies up to date and to surface known vulnerabilities.
+
+It is configured to:
+
+- Open pull requests automatically when new versions of Python packages in `requirements.txt` and `requirements-dev.txt` are released.
+- Alert on any dependency with a published CVE.
+
+Dependabot pull requests follow the same review and CI process as regular PRs. Merge them after verifying that tests pass and no breaking changes are introduced.
+
 ## Run with Docker Compose (full stack)
 
 From the **project root**:
