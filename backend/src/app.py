@@ -1,6 +1,6 @@
 import os
 import socket
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from flask import Flask, jsonify
 
@@ -31,7 +31,7 @@ def create_app():
             "name":        "customer-code-api",
             "version":     "1.0.0",
             "description": "Customer Code API",
-            "time":        datetime.now(timezone.utc).isoformat(),
+            "time":        datetime.now(UTC).isoformat(),
             "hostname":    socket.gethostname(),
         })
 
