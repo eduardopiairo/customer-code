@@ -1,0 +1,6 @@
+-r requirements.txt
+ruff
+bandit
+pip-audit
+pytest
+pytest-cov
