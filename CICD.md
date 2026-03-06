@@ -26,7 +26,7 @@ push / pull_request
 |---|---|
 | Feature branches (`feature/*`, `fix/*`) | ✅ Implemented |
 | Pull requests targeting `main` | ✅ Implemented |
-| Branch protection on `main` | ⬜ Not configured |
+| Branch protection on `main` | ✅ Configured |
 | Required PR reviews | ⬜ Not configured |
 
 ### 2. Code quality
@@ -106,7 +106,7 @@ push / pull_request
 |---|---|
 | Feature branches (`feature/*`, `fix/*`) | ✅ Implemented |
 | Pull requests targeting `main` | ✅ Implemented |
-| Branch protection on `main` | ⬜ Not configured |
+| Branch protection on `main` | ✅ Configured |
 | Required PR reviews | ⬜ Not configured |
 
 ### 2. Code quality
