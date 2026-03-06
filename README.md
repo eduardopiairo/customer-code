@@ -1,4 +1,4 @@
-# stakeholder-management-backend
+# Costumer Code Management
 Customer relations management API for the pharmaceutical and skin care industry.
 
 ## Setup

@@ -97,7 +97,7 @@ React 18 + Vite, served via Nginx, Docker.
 ```
 push / pull_request
        │
-       └── (no workflow yet) ── build & push ── deploy
+       └── build check ── build & push ── deploy
 ```
 
 ### 1. Source control
@@ -139,8 +139,8 @@ push / pull_request
 
 | Practice | Status |
 |---|---|
-| Docker image build | ⬜ Not implemented |
-| Push to Docker Hub with SHA tag | ⬜ Not implemented |
+| Docker image build | ✅ Implemented |
+| Push to Docker Hub with SHA tag | ✅ Implemented |
 | Multi-platform build (amd64/arm64) | ⬜ Not implemented |
 
 ### 6. Deploy
