@@ -3,33 +3,27 @@ from datetime import UTC, datetime
 from src.extensions import db
 
 
-class Store(db.Model):
-    __tablename__ = "stores"
+class StoreManager(db.Model):
+    __tablename__ = "store_managers"
 
     id         = db.Column(db.Integer, primary_key=True)
     name       = db.Column(db.String(255), nullable=False)
-    address    = db.Column(db.String(500), nullable=False)
+    email      = db.Column(db.String(255), nullable=False, unique=True)
     phone      = db.Column(db.String(50),  nullable=True)
-    email      = db.Column(db.String(255), nullable=True)
-    manager_id = db.Column(
-        db.Integer, db.ForeignKey("store_managers.id"), nullable=True
-    )
     created_at = db.Column(db.DateTime(timezone=True),
                            default=lambda: datetime.now(UTC))
     updated_at = db.Column(db.DateTime(timezone=True),
                            default=lambda: datetime.now(UTC),
                            onupdate=lambda: datetime.now(UTC))
 
-    manager = db.relationship("StoreManager", back_populates="stores")
+    stores = db.relationship("Store", back_populates="manager")
 
     def to_dict(self):
         return {
             "id":         self.id,
             "name":       self.name,
-            "address":    self.address,
-            "phone":      self.phone,
             "email":      self.email,
-            "manager_id": self.manager_id,
+            "phone":      self.phone,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
