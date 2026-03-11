@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-code-api
+  labels:
+    app: customer-code-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: customer-code-api
+  template:
+    metadata:
+      labels:
+        app: customer-code-api
+    spec:
+      containers:
+      - name: api
+        image: edpiairo/customer-code-api:0.0.1
+        ports:
+        - containerPort: 5000
