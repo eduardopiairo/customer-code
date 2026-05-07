@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash2, Plus, Store } from "lucide-react";
+import { Pencil, Trash2, Plus } from "lucide-react";
 
 import { listStores, createStore, updateStore, deleteStore } from "@/api/stores";
+import { listStoreManagers } from "@/api/storeManagers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,9 +15,9 @@ import {
   DialogFooter, DialogClose,
 } from "@/components/ui/dialog";
 
-const EMPTY_FORM = { name: "", address: "", phone: "", email: "" };
+const EMPTY_FORM = { name: "", address: "", phone: "", email: "", manager_id: "" };
 
-function StoreForm({ values, onChange, error }) {
+function StoreForm({ values, onChange, managers, error }) {
   return (
     <div className="grid gap-4">
       {error && (
@@ -59,12 +60,27 @@ function StoreForm({ values, onChange, error }) {
           onChange={(e) => onChange("email", e.target.value)}
         />
       </div>
+      <div className="grid gap-1.5">
+        <Label htmlFor="f-manager">Manager</Label>
+        <select
+          id="f-manager"
+          value={values.manager_id}
+          onChange={(e) => onChange("manager_id", e.target.value)}
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+        >
+          <option value="">— No manager —</option>
+          {managers.map((m) => (
+            <option key={m.id} value={m.id}>{m.name}</option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }
 
 export default function StoresPage() {
   const [stores, setStores]           = useState([]);
+  const [managers, setManagers]       = useState([]);
   const [loading, setLoading]         = useState(true);
   const [listError, setListError]     = useState("");
 
@@ -85,7 +101,12 @@ export default function StoresPage() {
     setLoading(true);
     setListError("");
     try {
-      setStores(await listStores());
+      const [storesData, managersData] = await Promise.all([
+        listStores(),
+        listStoreManagers(),
+      ]);
+      setStores(storesData);
+      setManagers(managersData);
     } catch (err) {
       setListError(err.message);
     } finally {
@@ -94,6 +115,11 @@ export default function StoresPage() {
   }
 
   useEffect(() => { load(); }, []);
+
+  function managerName(manager_id) {
+    const m = managers.find((m) => m.id === manager_id);
+    return m ? m.name : "—";
+  }
 
   function patchCreate(field, value) {
     setCreateForm((f) => ({ ...f, [field]: value }));
@@ -111,7 +137,10 @@ export default function StoresPage() {
     }
     setCreateBusy(true);
     try {
-      await createStore(createForm);
+      await createStore({
+        ...createForm,
+        manager_id: createForm.manager_id ? Number(createForm.manager_id) : null,
+      });
       setCreateOpen(false);
       setCreateForm(EMPTY_FORM);
       await load();
@@ -125,10 +154,11 @@ export default function StoresPage() {
   function openEdit(store) {
     setEditStore(store);
     setEditForm({
-      name:    store.name    ?? "",
-      address: store.address ?? "",
-      phone:   store.phone   ?? "",
-      email:   store.email   ?? "",
+      name:       store.name       ?? "",
+      address:    store.address    ?? "",
+      phone:      store.phone      ?? "",
+      email:      store.email      ?? "",
+      manager_id: store.manager_id ?? "",
     });
     setEditError("");
   }
@@ -141,7 +171,10 @@ export default function StoresPage() {
     }
     setEditBusy(true);
     try {
-      await updateStore(editStore.id, editForm);
+      await updateStore(editStore.id, {
+        ...editForm,
+        manager_id: editForm.manager_id ? Number(editForm.manager_id) : null,
+      });
       setEditStore(null);
       await load();
     } catch (err) {
@@ -165,33 +198,19 @@ export default function StoresPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Top bar */}
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <Store className="h-6 w-6 text-primary" />
-            <div>
-              <h1 className="text-lg font-semibold leading-none">Customer Code</h1>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                Pharma &amp; Skin Care
-              </p>
-            </div>
+    <>
+      <main className="mx-auto max-w-6xl px-6 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">Stores</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Manage your network of stores.
+            </p>
           </div>
           <Button onClick={() => { setCreateForm(EMPTY_FORM); setCreateError(""); setCreateOpen(true); }}>
             <Plus className="h-4 w-4" />
             Add Store
           </Button>
-        </div>
-      </header>
-
-      {/* Main content */}
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        <div className="mb-6">
-          <h2 className="text-2xl font-bold">Stores</h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage your network of stores.
-          </p>
         </div>
 
         {listError && (
@@ -209,19 +228,20 @@ export default function StoresPage() {
                 <TableHead>Address</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Manager</TableHead>
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
                     Loading…
                   </TableCell>
                 </TableRow>
               ) : stores.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="py-12 text-center text-muted-foreground">
                     No stores yet. Click <strong>Add Store</strong> to get started.
                   </TableCell>
                 </TableRow>
@@ -235,6 +255,7 @@ export default function StoresPage() {
                     <TableCell className="text-muted-foreground">{s.address}</TableCell>
                     <TableCell className="text-muted-foreground">{s.phone ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">{s.email ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{managerName(s.manager_id)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
                         <Button
@@ -273,7 +294,7 @@ export default function StoresPage() {
               Fill in the details below to add a new store or pharmacy.
             </DialogDescription>
           </DialogHeader>
-          <StoreForm values={createForm} onChange={patchCreate} error={createError} />
+          <StoreForm values={createForm} onChange={patchCreate} managers={managers} error={createError} />
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
@@ -294,7 +315,7 @@ export default function StoresPage() {
               Update the details for <strong>{editStore?.name}</strong>.
             </DialogDescription>
           </DialogHeader>
-          <StoreForm values={editForm} onChange={patchEdit} error={editError} />
+          <StoreForm values={editForm} onChange={patchEdit} managers={managers} error={editError} />
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
@@ -325,6 +346,6 @@ export default function StoresPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

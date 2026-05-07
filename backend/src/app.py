@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from flask import Flask, jsonify
 
 from src.extensions import db
-from src.routes import stores_bp
+from src.routes import store_managers_bp, stores_bp
 
 
 def create_app():
@@ -22,6 +22,7 @@ def create_app():
         db.create_all()
 
     app.register_blueprint(stores_bp)
+    app.register_blueprint(store_managers_bp)
 
     @app.route("/api/v1/health", methods=["GET"])
     def health():

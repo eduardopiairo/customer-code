@@ -1,4 +1,4 @@
-# CI/CD Maturity
+# CI/CD Pipeline Checklist
 
 This document describes the current state and planned evolution of the CI/CD pipeline, organised by service and stage.
 
@@ -7,18 +7,6 @@ This document describes the current state and planned evolution of the CI/CD pip
 ## Backend
 
 Flask REST API — Python 3.12, PostgreSQL, Docker.
-
-### Pipeline overview
-
-```
-push / pull_request
-       │
-       ├── lint ──────────────────────────────────┐
-       │                                          ├── build & push ── deploy
-       ├── test ─────── coverage report           │
-       │                                          │
-       └── security ─────────────────────────────┘
-```
 
 ### 1. Source control
 
@@ -92,13 +80,6 @@ push / pull_request
 
 React 18 + Vite, served via Nginx, Docker.
 
-### Pipeline overview
-
-```
-push / pull_request
-       │
-       └── build check ── build & push ── deploy
-```
 
 ### 1. Source control
 
