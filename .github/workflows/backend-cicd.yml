@@ -81,7 +81,7 @@ jobs:
     name: Build & Push
     runs-on: ubuntu-latest
     needs: [lint, security]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/feature/'))
     outputs:
       image_tag: ${{ steps.tag.outputs.value }}
 
