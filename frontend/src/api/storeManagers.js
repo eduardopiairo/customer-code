@@ -1,6 +1,13 @@
 const API_BASE = "/api/v1/store-managers";
 
+function validateId(id) {
+  if (!/^[a-zA-Z0-9_-]+$/.test(String(id))) {
+    throw new Error("Invalid store manager ID");
+  }
+}
+
 async function apiFetch(id = null, options = {}) {
+  if (id !== null) validateId(id);
   const url = id !== null ? `${API_BASE}/${encodeURIComponent(id)}` : API_BASE;
   const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
