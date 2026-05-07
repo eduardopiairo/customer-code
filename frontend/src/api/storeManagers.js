@@ -1,7 +1,8 @@
 const API_BASE = "/api/v1/store-managers";
 
-async function apiFetch(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
+async function apiFetch(id = null, options = {}) {
+  const url = id !== null ? `${API_BASE}/${encodeURIComponent(id)}` : API_BASE;
+  const res = await fetch(url, {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
@@ -11,13 +12,13 @@ async function apiFetch(path, options = {}) {
   return json;
 }
 
-export const listStoreManagers = () => apiFetch("");
+export const listStoreManagers = () => apiFetch();
 
 export const createStoreManager = (data) =>
-  apiFetch("", { method: "POST", body: JSON.stringify(data) });
+  apiFetch(null, { method: "POST", body: JSON.stringify(data) });
 
 export const updateStoreManager = (id, data) =>
-  apiFetch(`/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(data) });
+  apiFetch(id, { method: "PUT", body: JSON.stringify(data) });
 
 export const deleteStoreManager = (id) =>
-  apiFetch(`/${encodeURIComponent(id)}`, { method: "DELETE" });
+  apiFetch(id, { method: "DELETE" });
