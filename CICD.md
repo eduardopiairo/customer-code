@@ -1,4 +1,4 @@
-# CI/CD Maturity
+# CI/CD Pipeline Checklist
 
 This document describes the current state and planned evolution of the CI/CD pipeline, organised by service and stage.
 

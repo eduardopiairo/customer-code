@@ -1,5 +1,27 @@
 # Costumer Code Management
-Customer relations management API for the pharmaceutical and skin care industry.
+Customer relations management API for pharmacy stores.
+
+## Quick Start
+
+Run the full stack (API, frontend, and database) with a single command:
+
+```bash
+docker compose up --build
+```
+
+The frontend will be available at `http://localhost:8080`.
+
+To stop and remove containers:
+
+```bash
+docker compose down
+```
+
+To also remove the database volume:
+
+```bash
+docker compose down -v
+```
 
 ## Setup
 
