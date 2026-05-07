@@ -40,10 +40,10 @@ Flask REST API — Python 3.12, PostgreSQL, Docker.
 
 | Practice | Tool | Status |
 |---|---|---|
-| SAST — source code scanning | bandit | ✅ Implemented |
+| SAST — source code scanning | bandit, CodeQL | ✅ Implemented |
 | SCA — dependency CVE scanning | pip-audit | ✅ Implemented |
 | Automated dependency updates | Dependabot | ✅ Configured |
-| Container image scanning | Trivy / Grype | ⬜ Not implemented |
+| Container image scanning | Snyk, Trivy | ✅ Implemented |
 | Secret scanning | GitHub secret scanning | ⬜ Not configured |
 
 ### 5. Build & artifact

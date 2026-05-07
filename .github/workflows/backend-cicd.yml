@@ -107,6 +107,21 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/customer-code-api:${{ steps.tag.outputs.value }}
             ${{ secrets.DOCKERHUB_USERNAME }}/customer-code-api:latest
 
+      - name: Scan image with Snyk
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: ${{ secrets.DOCKERHUB_USERNAME }}/customer-code-api:${{ steps.tag.outputs.value }}
+          args: --severity-threshold=high
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/customer-code-api:${{ steps.tag.outputs.value }}
+          severity: HIGH,CRITICAL
+          exit-code: 1
+
   # deploy:
   #   name: Deploy to Kubernetes
   #   runs-on: ubuntu-latest
