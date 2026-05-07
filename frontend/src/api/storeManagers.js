@@ -17,7 +17,7 @@ export const createStoreManager = (data) =>
   apiFetch("", { method: "POST", body: JSON.stringify(data) });
 
 export const updateStoreManager = (id, data) =>
-  apiFetch(`/${id}`, { method: "PUT", body: JSON.stringify(data) });
+  apiFetch(`/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(data) });
 
 export const deleteStoreManager = (id) =>
-  apiFetch(`/${id}`, { method: "DELETE" });
+  apiFetch(`/${encodeURIComponent(id)}`, { method: "DELETE" });
