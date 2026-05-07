@@ -208,3 +208,8 @@ __marimo__/
 # Node
 node_modules/
 frontend/dist/
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
+.vscode/settings.json
