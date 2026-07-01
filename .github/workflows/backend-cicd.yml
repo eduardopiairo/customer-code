@@ -20,7 +20,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Run ruff
         uses: astral-sh/ruff-action@v3
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
@@ -58,7 +58,7 @@ jobs:
     name: Security
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
@@ -86,7 +86,7 @@ jobs:
       image_tag: ${{ steps.tag.outputs.value }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Set image tag
         id: tag
@@ -137,7 +137,7 @@ jobs:
   #   needs: build-and-push
 
   #   steps:
-  #     - uses: actions/checkout@v6
+  #     - uses: actions/checkout@v7
 
   #     - name: Set up kubectl
   #       uses: azure/setup-kubectl@v4
