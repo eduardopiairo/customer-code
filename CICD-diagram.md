@@ -99,15 +99,15 @@ Notes:
 A stage-oriented view across both services — what tool handles each stage, regardless of frontend/backend workflow boundaries.
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph VC["Version Control"]
-        direction TB
+        direction LR
         GH["GitHub\nfeature/*, fix/* branches\nPRs into main\nbranch protection"]
         DB["Dependabot\nautomated dependency PRs"]
     end
 
     subgraph CI["Continuous Integration"]
-        direction TB
+        direction LR
         Ruff["ruff\nlint (backend)"]
         ESLint["ESLint\nlint (frontend)"]:::disabled
         Pytest["pytest + pytest-cov\ntest (backend)"]
@@ -119,7 +119,7 @@ flowchart LR
     end
 
     subgraph AM["Artifact Management"]
-        direction TB
+        direction LR
         Docker["Docker\nimage build"]
         DockerHub["Docker Hub\nregistry, tags :sha7 + :latest"]
         Snyk["Snyk\nimage scan + monitor (backend only)"]
@@ -127,7 +127,7 @@ flowchart LR
     end
 
     subgraph CD["Continuous Delivery"]
-        direction TB
+        direction LR
         K8s["Kubernetes\nkubectl set image + rollout"]:::disabled
     end
 
