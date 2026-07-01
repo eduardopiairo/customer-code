@@ -91,3 +91,53 @@ Notes:
 | Image scanning | ✅ Snyk + Trivy | ⬜ none |
 | Builds images on feature branches | ✅ yes | ⬜ no (main only) |
 | Deploy to k8s | ⬜ scaffolded, disabled | ⬜ scaffolded, disabled |
+
+---
+
+## Pipeline by stage (tool map)
+
+A stage-oriented view across both services — what tool handles each stage, regardless of frontend/backend workflow boundaries.
+
+```mermaid
+flowchart LR
+    subgraph VC["Version Control"]
+        direction TB
+        GH["GitHub\nfeature/*, fix/* branches\nPRs into main\nbranch protection"]
+        DB["Dependabot\nautomated dependency PRs"]
+    end
+
+    subgraph CI["Continuous Integration"]
+        direction TB
+        Ruff["ruff\nlint (backend)"]
+        ESLint["ESLint\nlint (frontend)"]:::disabled
+        Pytest["pytest + pytest-cov\ntest (backend)"]
+        Vitest["Vitest\ntest (frontend)"]:::disabled
+        NpmBuild["npm run build\nbuild check (frontend)"]
+        Bandit["bandit + pip-audit\nSAST/SCA (backend)"]
+        CodeQL["CodeQL\nSAST (both, separate workflow)"]
+        Codacy["Codacy\ncoverage + quality dashboard"]
+    end
+
+    subgraph AM["Artifact Management"]
+        direction TB
+        Docker["Docker\nimage build"]
+        DockerHub["Docker Hub\nregistry, tags :sha7 + :latest"]
+        Snyk["Snyk\nimage scan + monitor (backend only)"]
+        Trivy["Trivy\nimage scan, non-blocking (backend only)"]
+    end
+
+    subgraph CD["Continuous Delivery"]
+        direction TB
+        K8s["Kubernetes\nkubectl set image + rollout"]:::disabled
+    end
+
+    VC --> CI --> AM --> CD
+
+    classDef disabled stroke-dasharray: 5 5,opacity:0.6
+```
+
+Notes:
+- Dashed nodes (ESLint, Vitest, Kubernetes deploy) exist in the workflow files but are commented out today — planned, not active.
+- Codacy and CodeQL are cross-cutting: Codacy ingests coverage from both services' test jobs; CodeQL runs as its own workflow ([`.github/workflows/codeql.yml`](.github/workflows/codeql.yml)) rather than inside the frontend/backend pipelines.
+- Artifact management is backend-heavy: Snyk and Trivy only scan the backend image — the frontend image is built and pushed with no scanning at all.
+- Continuous Delivery has no active tooling yet; the Kubernetes step is scaffolded in both workflows but disabled, so today's pipelines stop at "image pushed to Docker Hub."
