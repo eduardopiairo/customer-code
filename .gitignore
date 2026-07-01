@@ -210,6 +210,5 @@ node_modules/
 frontend/dist/
 
 
-#Ignore vscode AI rules
-.github/instructions/codacy.instructions.md
+#Ignore vscode settings
 .vscode/settings.json
