@@ -115,7 +115,7 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/customer-code-api:latest
 
       - name: Scan image with Snyk
-        uses: snyk/actions/docker@8e119fbb6c251787721d34ba683ed48eba792766 # master
+        uses: snyk/actions/docker@b075801f26076be9bb50521154cafab73f44da0c # master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
@@ -123,7 +123,7 @@ jobs:
           args: --severity-threshold=high
 
       - name: Monitor image with Snyk
-        uses: snyk/actions/docker@8e119fbb6c251787721d34ba683ed48eba792766 # master
+        uses: snyk/actions/docker@b075801f26076be9bb50521154cafab73f44da0c # master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
