@@ -6,7 +6,10 @@ async function apiFetch(path, options = {}) {
     ...options,
   });
   if (res.status === 204) return null;
-  const json = await res.json();
+  const json = await res.json().catch(() => null);
+  if (json === null) {
+    throw new Error(`API unavailable or returned invalid data (HTTP ${res.status})`);
+  }
   if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
   return json;
 }

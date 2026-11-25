@@ -6,7 +6,7 @@
 # so no CORS setup is needed). Replace the URL with your deployed app's URL.
 [[redirects]]
   from   = "/api/*"
-  to     = "https://YOUR-APP.fastapicloud.dev/api/:splat"
+  to     = "https://customer-code.fastapicloud.dev/api/:splat"
   status = 200
   force  = true
 
