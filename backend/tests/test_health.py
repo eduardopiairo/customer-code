@@ -5,7 +5,7 @@ def test_health_returns_200(client):
 
 def test_health_returns_healthy_status(client):
     response = client.get("/api/v1/health")
-    assert response.get_json() == {"status": "healthy"}
+    assert response.json() == {"status": "healthy"}
 
 
 def test_details_returns_200(client):
@@ -14,7 +14,7 @@ def test_details_returns_200(client):
 
 
 def test_details_returns_expected_fields(client):
-    data = client.get("/api/v1/details").get_json()
+    data = client.get("/api/v1/details").json()
     assert data["name"] == "customer-code-api"
     assert data["version"] == "1.0.0"
     assert "time" in data
