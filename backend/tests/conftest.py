@@ -1,9 +1,15 @@
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import sessionmaker
+import os
 
-from src.app import create_app
-from src.database import Base, get_db, make_engine
+# Must run before importing src.*: tests never touch a real database,
+# even if backend/.env defines DATABASE_URL (load_dotenv doesn't override).
+os.environ["DATABASE_URL"] = "sqlite:///:memory:"
+
+import pytest  # noqa: E402
+from fastapi.testclient import TestClient  # noqa: E402
+from sqlalchemy.orm import sessionmaker  # noqa: E402
+
+from src.app import create_app  # noqa: E402
+from src.database import Base, get_db, make_engine  # noqa: E402
 
 
 @pytest.fixture

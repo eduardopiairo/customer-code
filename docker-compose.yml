@@ -6,6 +6,8 @@ services:
       POSTGRES_DB:       pharmacies
       POSTGRES_USER:     appuser
       POSTGRES_PASSWORD: apppassword
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:

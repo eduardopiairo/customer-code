@@ -1,6 +1,7 @@
 msgpack>=1.2.1 # not directly required, pinned by Snyk to avoid a vulnerability
 fastapi[standard]
 sqlalchemy>=2.0
+python-dotenv>=1.0
 psycopg[binary]>=3.2
 psycopg2-binary==2.9.12
 starlette>=1.0.1 # not directly required, pinned by Snyk to avoid a vulnerability

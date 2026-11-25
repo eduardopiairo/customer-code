@@ -1,0 +1,18 @@
+[build]
+  base    = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# Proxy API calls to the FastAPI Cloud backend (same-origin for the browser,
+# so no CORS setup is needed). Replace the URL with your deployed app's URL.
+[[redirects]]
+  from   = "/api/*"
+  to     = "https://YOUR-APP.fastapicloud.dev/api/:splat"
+  status = 200
+  force  = true
+
+# SPA fallback for client-side routes
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
