@@ -5,3 +5,4 @@ pip-audit
 pytest
 pytest-cov
 httpx
+msgpack>=1.2.3 # not directly required, pinned by Snyk to avoid a vulnerability
