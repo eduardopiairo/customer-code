@@ -1,9 +1,15 @@
 import os
 from collections.abc import Iterator
 
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.pool import StaticPool
+
+
+# Load backend/.env for local runs. Real environment variables win
+# (override=False), and nothing happens if the file doesn't exist.
+load_dotenv()
 
 
 class Base(DeclarativeBase):
