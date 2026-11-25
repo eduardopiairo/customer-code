@@ -1,79 +1,53 @@
-from flask import Blueprint, jsonify, request
+from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from src.extensions import db
+from src.database import get_db
 from src.models.store import Store
+from src.routes.utils import apply_update, require_non_empty
+from src.schemas import StoreIn, StoreOut, StoreUpdate
 
-stores_bp = Blueprint("stores", __name__, url_prefix="/api/v1/stores")
-
-
-@stores_bp.route("", methods=["GET"])
-def list_stores():
-    stores = Store.query.order_by(Store.id).all()
-    return jsonify([s.to_dict() for s in stores]), 200
+router = APIRouter(prefix="/api/v1/stores", tags=["stores"])
 
 
-@stores_bp.route("", methods=["POST"])
-def create_store():
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({"error": "Request body must be JSON"}), 400
-
-    name    = (data.get("name") or "").strip()
-    address = (data.get("address") or "").strip()
-    if not name or not address:
-        return jsonify(
-            {"error": "Fields 'name' and 'address' are required"}
-        ), 422
-
-    store = Store(
-        name    = name,
-        address = address,
-        phone   = (data.get("phone") or "").strip() or None,
-        email   = (data.get("email") or "").strip() or None,
-    )
-    db.session.add(store)
-    db.session.commit()
-    return jsonify(store.to_dict()), 201
+def _get_or_404(db: Session, store_id: int) -> Store:
+    store = db.get(Store, store_id)
+    if store is None:
+        raise HTTPException(404, "Store not found")
+    return store
 
 
-@stores_bp.route("/<int:store_id>", methods=["GET"])
-def get_store(store_id):
-    store = db.get_or_404(Store, store_id)
-    return jsonify(store.to_dict()), 200
+@router.get("", response_model=list[StoreOut])
+def list_stores(db: Session = Depends(get_db)):
+    return db.scalars(select(Store).order_by(Store.id)).all()
 
 
-@stores_bp.route("/<int:store_id>", methods=["PUT"])
-def update_store(store_id):
-    store = db.get_or_404(Store, store_id)
-    data  = request.get_json(silent=True)
-    if not data:
-        return jsonify({"error": "Request body must be JSON"}), 400
-
-    if "name" in data:
-        name = data["name"].strip()
-        if not name:
-            return jsonify({"error": "'name' cannot be empty"}), 422
-        store.name = name
-
-    if "address" in data:
-        address = data["address"].strip()
-        if not address:
-            return jsonify({"error": "'address' cannot be empty"}), 422
-        store.address = address
-
-    if "phone" in data:
-        store.phone = data["phone"].strip() or None
-
-    if "email" in data:
-        store.email = data["email"].strip() or None
-
-    db.session.commit()
-    return jsonify(store.to_dict()), 200
+@router.post("", response_model=StoreOut, status_code=201)
+def create_store(payload: StoreIn, db: Session = Depends(get_db)):
+    require_non_empty(payload, "name", "address")
+    store = Store(**payload.model_dump())
+    db.add(store)
+    db.commit()
+    return store
 
 
-@stores_bp.route("/<int:store_id>", methods=["DELETE"])
-def delete_store(store_id):
-    store = db.get_or_404(Store, store_id)
-    db.session.delete(store)
-    db.session.commit()
-    return "", 204
+@router.get("/{store_id}", response_model=StoreOut)
+def get_store(store_id: int, db: Session = Depends(get_db)):
+    return _get_or_404(db, store_id)
+
+
+@router.put("/{store_id}", response_model=StoreOut)
+def update_store(
+    store_id: int, payload: StoreUpdate, db: Session = Depends(get_db)
+):
+    store = _get_or_404(db, store_id)
+    apply_update(store, payload, required=("name", "address"))
+    db.commit()
+    return store
+
+
+@router.delete("/{store_id}", status_code=204)
+def delete_store(store_id: int, db: Session = Depends(get_db)):
+    db.delete(_get_or_404(db, store_id))
+    db.commit()
+    return Response(status_code=204)

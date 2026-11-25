@@ -1,4 +1,4 @@
-from .store_managers import store_managers_bp
-from .stores import stores_bp
+from .store_managers import router as store_managers_router
+from .stores import router as stores_router
 
-__all__ = ["stores_bp", "store_managers_bp"]
+__all__ = ["stores_router", "store_managers_router"]
