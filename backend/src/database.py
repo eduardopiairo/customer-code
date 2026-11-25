@@ -23,9 +23,10 @@ def make_engine(url: str):
 
 def _database_url() -> str:
     url = os.environ.get("DATABASE_URL", "sqlite:///:memory:")
-    # some providers hand out the legacy "postgres://" scheme
-    if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
+    # normalise every Postgres flavour to the psycopg (v3) driver
+    for prefix in ("postgres://", "postgresql://", "postgresql+psycopg2://"):
+        if url.startswith(prefix):
+            return "postgresql+psycopg://" + url[len(prefix):]
     return url
 
 
