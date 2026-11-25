@@ -1,48 +1,70 @@
-import os
 import socket
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
-from flask import Flask, jsonify
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
-from src.extensions import db
-from src.routes import store_managers_bp, stores_bp
+from src import models  # noqa: F401  (registers tables on Base.metadata)
+from src.database import Base, engine
+from src.routes import store_managers_router, stores_router
 
 
-def create_app():
-    app = Flask(__name__)
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(engine)
+    yield
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
-        "DATABASE_URL", "sqlite:///:memory:"
+
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="Customer Code API", version="1.0.0", lifespan=lifespan
     )
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
-    db.init_app(app)
+    # Keep the {"error": ...} response shape the frontend relies on.
+    @app.exception_handler(HTTPException)
+    async def http_error(request: Request, exc: HTTPException):
+        return JSONResponse({"error": exc.detail}, status_code=exc.status_code)
 
-    with app.app_context():
-        db.create_all()
+    @app.exception_handler(RequestValidationError)
+    async def validation_error(request: Request, exc: RequestValidationError):
+        errors = exc.errors()
+        body_errors = [e for e in errors if e["loc"][:1] == ("body",)]
+        if body_errors and (
+            body_errors[0]["type"] in {"json_invalid", "model_attributes_type"}
+            or body_errors[0]["loc"] == ("body",)
+            and body_errors[0]["type"] == "missing"
+        ):
+            return JSONResponse(
+                {"error": "Request body must be JSON"}, status_code=400
+            )
+        fields = ", ".join(
+            sorted({str(e["loc"][-1]) for e in errors if e["loc"]})
+        )
+        return JSONResponse(
+            {"error": f"Invalid or missing field(s): {fields}"},
+            status_code=422,
+        )
 
-    app.register_blueprint(stores_bp)
-    app.register_blueprint(store_managers_bp)
+    app.include_router(stores_router)
+    app.include_router(store_managers_router)
 
-    @app.route("/api/v1/health", methods=["GET"])
+    @app.get("/api/v1/health")
     def health():
-        return jsonify({"status": "healthy"}), 200
+        return {"status": "healthy"}
 
-    @app.route("/api/v1/details", methods=["GET"])
+    @app.get("/api/v1/details")
     def details():
-        return jsonify({
-            "name":        "customer-code-api",
-            "version":     "1.0.0",
+        return {
+            "name": "customer-code-api",
+            "version": "1.0.0",
             "description": "Customer Code API",
-            "time":        datetime.now(UTC).isoformat(),
-            "hostname":    socket.gethostname(),
-        })
+            "time": datetime.now(UTC).isoformat(),
+            "hostname": socket.gethostname(),
+        }
 
     return app
 
 
 app = create_app()
-
-if __name__ == "__main__":
-    debug = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-    app.run(debug=debug)

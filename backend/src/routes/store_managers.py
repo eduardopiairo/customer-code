@@ -1,77 +1,57 @@
-from flask import Blueprint, jsonify, request
+from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from src.extensions import db
+from src.database import get_db
 from src.models.store_manager import StoreManager
+from src.routes.utils import apply_update, require_non_empty
+from src.schemas import StoreManagerIn, StoreManagerOut, StoreManagerUpdate
 
-store_managers_bp = Blueprint(
-    "store_managers", __name__, url_prefix="/api/v1/store-managers"
-)
-
-
-@store_managers_bp.route("", methods=["GET"])
-def list_store_managers():
-    managers = StoreManager.query.order_by(StoreManager.id).all()
-    return jsonify([m.to_dict() for m in managers]), 200
+router = APIRouter(prefix="/api/v1/store-managers", tags=["store-managers"])
 
 
-@store_managers_bp.route("", methods=["POST"])
-def create_store_manager():
-    data = request.get_json(silent=True)
-    if not data:
-        return jsonify({"error": "Request body must be JSON"}), 400
-
-    name  = (data.get("name") or "").strip()
-    email = (data.get("email") or "").strip()
-    if not name or not email:
-        return jsonify(
-            {"error": "Fields 'name' and 'email' are required"}
-        ), 422
-
-    manager = StoreManager(
-        name  = name,
-        email = email,
-        phone = (data.get("phone") or "").strip() or None,
-    )
-    db.session.add(manager)
-    db.session.commit()
-    return jsonify(manager.to_dict()), 201
+def _get_or_404(db: Session, manager_id: int) -> StoreManager:
+    manager = db.get(StoreManager, manager_id)
+    if manager is None:
+        raise HTTPException(404, "Store manager not found")
+    return manager
 
 
-@store_managers_bp.route("/<int:manager_id>", methods=["GET"])
-def get_store_manager(manager_id):
-    manager = db.get_or_404(StoreManager, manager_id)
-    return jsonify(manager.to_dict()), 200
+@router.get("", response_model=list[StoreManagerOut])
+def list_store_managers(db: Session = Depends(get_db)):
+    return db.scalars(select(StoreManager).order_by(StoreManager.id)).all()
 
 
-@store_managers_bp.route("/<int:manager_id>", methods=["PUT"])
-def update_store_manager(manager_id):
-    manager = db.get_or_404(StoreManager, manager_id)
-    data    = request.get_json(silent=True)
-    if not data:
-        return jsonify({"error": "Request body must be JSON"}), 400
-
-    if "name" in data:
-        name = data["name"].strip()
-        if not name:
-            return jsonify({"error": "'name' cannot be empty"}), 422
-        manager.name = name
-
-    if "email" in data:
-        email = data["email"].strip()
-        if not email:
-            return jsonify({"error": "'email' cannot be empty"}), 422
-        manager.email = email
-
-    if "phone" in data:
-        manager.phone = data["phone"].strip() or None
-
-    db.session.commit()
-    return jsonify(manager.to_dict()), 200
+@router.post("", response_model=StoreManagerOut, status_code=201)
+def create_store_manager(
+    payload: StoreManagerIn, db: Session = Depends(get_db)
+):
+    require_non_empty(payload, "name", "email")
+    manager = StoreManager(**payload.model_dump())
+    db.add(manager)
+    db.commit()
+    return manager
 
 
-@store_managers_bp.route("/<int:manager_id>", methods=["DELETE"])
-def delete_store_manager(manager_id):
-    manager = db.get_or_404(StoreManager, manager_id)
-    db.session.delete(manager)
-    db.session.commit()
-    return "", 204
+@router.get("/{manager_id}", response_model=StoreManagerOut)
+def get_store_manager(manager_id: int, db: Session = Depends(get_db)):
+    return _get_or_404(db, manager_id)
+
+
+@router.put("/{manager_id}", response_model=StoreManagerOut)
+def update_store_manager(
+    manager_id: int,
+    payload: StoreManagerUpdate,
+    db: Session = Depends(get_db),
+):
+    manager = _get_or_404(db, manager_id)
+    apply_update(manager, payload, required=("name", "email"))
+    db.commit()
+    return manager
+
+
+@router.delete("/{manager_id}", status_code=204)
+def delete_store_manager(manager_id: int, db: Session = Depends(get_db)):
+    db.delete(_get_or_404(db, manager_id))
+    db.commit()
+    return Response(status_code=204)
