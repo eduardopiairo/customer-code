@@ -9,13 +9,13 @@ def store_payload():
 def test_list_stores_empty(client):
     response = client.get("/api/v1/stores")
     assert response.status_code == 200
-    assert response.get_json() == []
+    assert response.json() == []
 
 
 def test_create_store(client, store_payload):
     response = client.post("/api/v1/stores", json=store_payload)
     assert response.status_code == 201
-    data = response.get_json()
+    data = response.json()
     assert data["name"] == store_payload["name"]
     assert data["address"] == store_payload["address"]
     assert "id" in data
@@ -29,17 +29,17 @@ def test_create_store_missing_fields(client):
 def test_create_store_invalid_json(client):
     response = client.post(
         "/api/v1/stores",
-        data="not json",
-        content_type="text/plain",
+        content="not json",
+        headers={"content-type": "text/plain"},
     )
     assert response.status_code == 400
 
 
 def test_get_store(client, store_payload):
-    created = client.post("/api/v1/stores", json=store_payload).get_json()
+    created = client.post("/api/v1/stores", json=store_payload).json()
     response = client.get(f"/api/v1/stores/{created['id']}")
     assert response.status_code == 200
-    assert response.get_json()["id"] == created["id"]
+    assert response.json()["id"] == created["id"]
 
 
 def test_get_store_not_found(client):
@@ -48,17 +48,30 @@ def test_get_store_not_found(client):
 
 
 def test_update_store(client, store_payload):
-    created = client.post("/api/v1/stores", json=store_payload).get_json()
+    created = client.post("/api/v1/stores", json=store_payload).json()
     response = client.put(
         f"/api/v1/stores/{created['id']}",
         json={"name": "Updated Name"},
     )
     assert response.status_code == 200
-    assert response.get_json()["name"] == "Updated Name"
+    assert response.json()["name"] == "Updated Name"
 
 
 def test_delete_store(client, store_payload):
-    created = client.post("/api/v1/stores", json=store_payload).get_json()
+    created = client.post("/api/v1/stores", json=store_payload).json()
     response = client.delete(f"/api/v1/stores/{created['id']}")
     assert response.status_code == 204
     assert client.get(f"/api/v1/stores/{created['id']}").status_code == 404
+
+
+def test_update_store_blank_name_rejected(client, store_payload):
+    created = client.post("/api/v1/stores", json=store_payload).json()
+    response = client.put(
+        f"/api/v1/stores/{created['id']}", json={"name": "  "}
+    )
+    assert response.status_code == 422
+    assert "error" in response.json()
+
+
+def test_not_found_uses_error_key(client):
+    assert "error" in client.get("/api/v1/stores/999").json()

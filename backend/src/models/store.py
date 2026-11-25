@@ -1,35 +1,31 @@
 from datetime import UTC, datetime
 
-from src.extensions import db
+from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.database import Base
 
 
-class Store(db.Model):
+def _now() -> datetime:
+    return datetime.now(UTC)
+
+
+class Store(Base):
     __tablename__ = "stores"
 
-    id         = db.Column(db.Integer, primary_key=True)
-    name       = db.Column(db.String(255), nullable=False)
-    address    = db.Column(db.String(500), nullable=False)
-    phone      = db.Column(db.String(50),  nullable=True)
-    email      = db.Column(db.String(255), nullable=True)
-    manager_id = db.Column(
-        db.Integer, db.ForeignKey("store_managers.id"), nullable=True
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(255))
+    address: Mapped[str] = mapped_column(String(500))
+    phone: Mapped[str | None] = mapped_column(String(50))
+    email: Mapped[str | None] = mapped_column(String(255))
+    manager_id: Mapped[int | None] = mapped_column(
+        ForeignKey("store_managers.id")
     )
-    created_at = db.Column(db.DateTime(timezone=True),
-                           default=lambda: datetime.now(UTC))
-    updated_at = db.Column(db.DateTime(timezone=True),
-                           default=lambda: datetime.now(UTC),
-                           onupdate=lambda: datetime.now(UTC))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, onupdate=_now
+    )
 
-    manager = db.relationship("StoreManager", back_populates="stores")
-
-    def to_dict(self):
-        return {
-            "id":         self.id,
-            "name":       self.name,
-            "address":    self.address,
-            "phone":      self.phone,
-            "email":      self.email,
-            "manager_id": self.manager_id,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-        }
+    manager = relationship("StoreManager", back_populates="stores")

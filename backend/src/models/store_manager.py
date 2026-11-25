@@ -1,29 +1,27 @@
 from datetime import UTC, datetime
 
-from src.extensions import db
+from sqlalchemy import DateTime, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from src.database import Base
 
 
-class StoreManager(db.Model):
+def _now() -> datetime:
+    return datetime.now(UTC)
+
+
+class StoreManager(Base):
     __tablename__ = "store_managers"
 
-    id         = db.Column(db.Integer, primary_key=True)
-    name       = db.Column(db.String(255), nullable=False)
-    email      = db.Column(db.String(255), nullable=False, unique=True)
-    phone      = db.Column(db.String(50),  nullable=True)
-    created_at = db.Column(db.DateTime(timezone=True),
-                           default=lambda: datetime.now(UTC))
-    updated_at = db.Column(db.DateTime(timezone=True),
-                           default=lambda: datetime.now(UTC),
-                           onupdate=lambda: datetime.now(UTC))
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(255))
+    email: Mapped[str] = mapped_column(String(255), unique=True)
+    phone: Mapped[str | None] = mapped_column(String(50))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_now, onupdate=_now
+    )
 
-    stores = db.relationship("Store", back_populates="manager")
-
-    def to_dict(self):
-        return {
-            "id":         self.id,
-            "name":       self.name,
-            "email":      self.email,
-            "phone":      self.phone,
-            "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-        }
+    stores = relationship("Store", back_populates="manager")

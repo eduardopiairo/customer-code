@@ -1,6 +1,6 @@
 # customer-code backend
 
-REST API built with Flask and PostgreSQL for the Customer Code application.
+REST API built with FastAPI and PostgreSQL for the Customer Code application.
 
 ## Prerequisites
 
@@ -43,12 +43,12 @@ export DATABASE_URL=postgresql://user:password@localhost:5432/pharmacies
 ### Start the development server
 
 ```bash
-python src/app.py
+fastapi dev  # entrypoint set in pyproject.toml
 ```
 
-The API will be available at `http://localhost:5000`.
+The API will be available at `http://localhost:8000` (interactive docs at `/docs`).
 
-> The database tables are created automatically on startup via `db.create_all()`.
+> The database tables are created automatically on startup via SQLAlchemy `create_all()`.
 
 ## API endpoints
 
