@@ -1,6 +1,10 @@
-import { useState } from "react";
-import { Store, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { LogOut, Store, Users } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+import { logout } from "@/api/auth";
+import { UNAUTHORIZED_EVENT, getToken } from "@/api/client";
+import LoginPage from "@/pages/Login";
 import StoresPage from "@/pages/Stores";
 import StoreManagersPage from "@/pages/StoreManagers";
 
@@ -11,6 +15,21 @@ const PAGES = [
 
 export default function App() {
   const [page, setPage] = useState("stores");
+  const [authed, setAuthed] = useState(() => Boolean(getToken()));
+
+  // an expired/invalid token anywhere in the app sends the user to login
+  useEffect(() => {
+    const onUnauthorized = () => setAuthed(false);
+    window.addEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, onUnauthorized);
+  }, []);
+
+  if (!authed) return <LoginPage onLoggedIn={() => setAuthed(true)} />;
+
+  function handleLogout() {
+    logout();
+    setAuthed(false);
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -40,6 +59,15 @@ export default function App() {
               </button>
             ))}
           </nav>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto"
+            onClick={handleLogout}
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign out
+          </Button>
         </div>
       </header>
 
