@@ -33,8 +33,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-8 px-6 py-4">
+      <header className="sticky top-0 z-40 border-b bg-white pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-8 gap-y-3 px-4 py-3 sm:px-6 sm:py-4">
           <div className="flex items-center gap-3">
             <Store className="h-6 w-6 text-primary" />
             <div>
@@ -42,13 +42,13 @@ export default function App() {
               <p className="mt-0.5 text-xs text-muted-foreground">Pharma Stores</p>
             </div>
           </div>
-          <nav className="flex gap-1">
+          <nav className="order-last flex w-full gap-1 md:order-none md:w-auto">
             {PAGES.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => setPage(key)}
                 className={[
-                  "flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                  "flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors md:flex-none md:py-1.5",
                   page === key
                     ? "bg-primary/10 text-primary"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -64,9 +64,10 @@ export default function App() {
             size="sm"
             className="ml-auto"
             onClick={handleLogout}
+            aria-label="Sign out"
           >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
+            <LogOut className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Sign out</span>
           </Button>
         </div>
       </header>
