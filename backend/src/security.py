@@ -79,3 +79,9 @@ def get_current_user(
     if user is None:
         raise unauthorized
     return user
+
+
+def require_admin(user: User = Depends(get_current_user)) -> User:
+    if not user.is_admin:
+        raise HTTPException(403, "Administrator access required")
+    return user

@@ -28,6 +28,14 @@ def anon_client():
             User(
                 email="admin@example.com",
                 password_hash=hash_password("correct-horse-battery"),
+                is_admin=True,
+            )
+        )
+        session.add(
+            User(
+                email="member@example.com",
+                password_hash=hash_password("member-password-1"),
+                is_admin=False,
             )
         )
         session.commit()
@@ -47,7 +55,17 @@ def anon_client():
 def client(anon_client):
     """Client already authenticated as the seeded user."""
     with anon_client.session_factory() as session:
-        user = session.query(User).first()
+        user = session.query(User).filter_by(is_admin=True).first()
+        token = create_token(user)
+    anon_client.headers["Authorization"] = f"Bearer {token}"
+    return anon_client
+
+
+@pytest.fixture
+def member_client(anon_client):
+    """Client authenticated as a non-admin user."""
+    with anon_client.session_factory() as session:
+        user = session.query(User).filter_by(is_admin=False).first()
         token = create_token(user)
     anon_client.headers["Authorization"] = f"Bearer {token}"
     return anon_client

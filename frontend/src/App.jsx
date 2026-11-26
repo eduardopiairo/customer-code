@@ -1,21 +1,35 @@
 import { useEffect, useState } from "react";
-import { LogOut, Store, Users } from "lucide-react";
+import { LogOut, Shield, Store, Users } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { logout } from "@/api/auth";
+import { getMe, logout } from "@/api/auth";
 import { UNAUTHORIZED_EVENT, getToken } from "@/api/client";
 import LoginPage from "@/pages/Login";
 import StoresPage from "@/pages/Stores";
 import StoreManagersPage from "@/pages/StoreManagers";
+import UsersPage from "@/pages/Users";
 
 const PAGES = [
   { key: "stores",   label: "Stores",   icon: Store },
   { key: "managers", label: "Managers", icon: Users },
 ];
 
+const ADMIN_PAGE = { key: "users", label: "Users", icon: Shield };
+
 export default function App() {
   const [page, setPage] = useState("stores");
   const [authed, setAuthed] = useState(() => Boolean(getToken()));
+  const [me, setMe] = useState(null);
+
+  // who is signed in (decides whether the Users tab is shown)
+  useEffect(() => {
+    if (!authed) return;
+    let cancelled = false;
+    getMe()
+      .then((u) => { if (!cancelled) setMe(u); })
+      .catch(() => { /* a 401 is handled by the unauthorized event */ });
+    return () => { cancelled = true; };
+  }, [authed]);
 
   // an expired/invalid token anywhere in the app sends the user to login
   useEffect(() => {
@@ -28,6 +42,8 @@ export default function App() {
 
   function handleLogout() {
     logout();
+    setMe(null);
+    setPage("stores");
     setAuthed(false);
   }
 
@@ -43,7 +59,7 @@ export default function App() {
             </div>
           </div>
           <nav className="order-last flex w-full gap-1 md:order-none md:w-auto">
-            {PAGES.map(({ key, label, icon: Icon }) => (
+            {(me?.is_admin ? [...PAGES, ADMIN_PAGE] : PAGES).map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 onClick={() => setPage(key)}
@@ -74,6 +90,7 @@ export default function App() {
 
       {page === "stores"   && <StoresPage />}
       {page === "managers" && <StoreManagersPage />}
+      {page === "users" && me?.is_admin && <UsersPage currentUserId={me.id} />}
     </div>
   );
 }

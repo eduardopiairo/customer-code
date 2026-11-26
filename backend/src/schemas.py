@@ -72,4 +72,5 @@ class StoreManagerOut(_Out):
 class UserOut(_Out):
     id: int
     email: str
+    is_admin: bool
     created_at: datetime

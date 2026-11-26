@@ -2,7 +2,7 @@ import os
 from collections.abc import Iterator
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -42,3 +42,24 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 def get_db() -> Iterator[Session]:
     with SessionLocal() as session:
         yield session
+
+
+def upgrade_schema(eng=None) -> None:
+    """Small in-place upgrades for tables created by older versions.
+
+    ``create_all`` never alters existing tables, so columns added later are
+    applied here. Idempotent; safe to run on every start.
+    """
+    eng = eng or engine
+    insp = inspect(eng)
+    if "users" not in insp.get_table_names():
+        return
+    cols = {c["name"] for c in insp.get_columns("users")}
+    with eng.begin() as conn:
+        if "is_admin" not in cols:
+            conn.execute(
+                text(
+                    "ALTER TABLE users ADD COLUMN is_admin BOOLEAN "
+                    "NOT NULL DEFAULT FALSE"
+                )
+            )
