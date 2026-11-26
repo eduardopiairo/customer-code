@@ -9,10 +9,21 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import select
 
 from src import models  # noqa: F401  (registers tables on Base.metadata)
-from src.database import Base, SessionLocal, engine
+from src.database import Base, SessionLocal, engine, upgrade_schema
 from src.models.user import User
 from src.routes import auth_router, store_managers_router, stores_router
 from src.security import get_current_user, hash_password
+
+
+def ensure_an_admin() -> None:
+    """Databases from before roles existed: promote the oldest user."""
+    with SessionLocal() as db:
+        if db.scalar(select(User.id).where(User.is_admin.is_(True)).limit(1)):
+            return
+        first = db.scalar(select(User).order_by(User.id).limit(1))
+        if first is not None:
+            first.is_admin = True
+            db.commit()
 
 
 def seed_first_user() -> None:
@@ -23,13 +34,21 @@ def seed_first_user() -> None:
         return
     with SessionLocal() as db:
         if db.scalar(select(User.id).limit(1)) is None:
-            db.add(User(email=email, password_hash=hash_password(password)))
+            db.add(
+                User(
+                    email=email,
+                    password_hash=hash_password(password),
+                    is_admin=True,
+                )
+            )
             db.commit()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(engine)
+    upgrade_schema()
+    ensure_an_admin()
     seed_first_user()
     yield
 

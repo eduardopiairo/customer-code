@@ -12,8 +12,13 @@ export const logout = () => setToken(null);
 
 export const getMe = () => request("/api/v1/auth/me");
 
-export const createUser = (email, password) =>
+export const listUsers = () => request("/api/v1/users");
+
+export const createUser = (email, password, isAdmin = false) =>
   request("/api/v1/users", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, is_admin: isAdmin }),
   });
+
+export const deleteUser = (id) =>
+  request(`/api/v1/users/${Number(id)}`, { method: "DELETE" });
