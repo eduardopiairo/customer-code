@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import {
   listStoreManagers,
@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import MobileList from "@/components/MobileList";
+import RowActions from "@/components/RowActions";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -162,8 +164,8 @@ export default function StoreManagersPage() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-8">
-      <div className="mb-6 flex items-center justify-between">
+    <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+      <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold">Store Managers</h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -171,6 +173,7 @@ export default function StoreManagersPage() {
           </p>
         </div>
         <Button
+          className="w-full sm:w-auto"
           onClick={() => {
             setCreateForm(EMPTY_FORM);
             setCreateError("");
@@ -188,7 +191,29 @@ export default function StoreManagersPage() {
         </div>
       )}
 
-      <div className="rounded-lg border bg-white shadow-sm">
+      <MobileList
+        items={managers}
+        loading={loading}
+        empty={<>No managers yet. Tap <strong>Add Manager</strong> to get started.</>}
+        renderBody={(m) => (
+          <>
+            <p className="truncate font-medium">{m.name}</p>
+            <p className="truncate text-sm">
+              <a className="text-primary underline" href={`mailto:${m.email}`}>{m.email}</a>
+            </p>
+            {m.phone && (
+              <p className="text-sm">
+                <a className="text-primary underline" href={`tel:${m.phone}`}>{m.phone}</a>
+              </p>
+            )}
+          </>
+        )}
+        actions={(m) => (
+          <RowActions label={m.name} onEdit={() => openEdit(m)} onDelete={() => setDeleteTarget(m)} />
+        )}
+      />
+
+      <div className="hidden rounded-lg border bg-white shadow-sm md:block">
         <Table>
           <TableHeader>
             <TableRow>
@@ -220,25 +245,7 @@ export default function StoreManagersPage() {
                   <TableCell className="text-muted-foreground">{m.email}</TableCell>
                   <TableCell className="text-muted-foreground">{m.phone ?? "—"}</TableCell>
                   <TableCell className="text-right">
-                    <div className="flex justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => openEdit(m)}
-                        title="Edit"
-                      >
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() => setDeleteTarget(m)}
-                        title="Delete"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                    <RowActions label={m.name} onEdit={() => openEdit(m)} onDelete={() => setDeleteTarget(m)} />
                   </TableCell>
                 </TableRow>
               ))

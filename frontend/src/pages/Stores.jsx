@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { listStores, createStore, updateStore, deleteStore } from "@/api/stores";
 import { listStoreManagers } from "@/api/storeManagers";
@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import MobileList from "@/components/MobileList";
+import RowActions from "@/components/RowActions";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -66,7 +68,7 @@ function StoreForm({ values, onChange, managers, error }) {
           id="f-manager"
           value={values.manager_id}
           onChange={(e) => onChange("manager_id", e.target.value)}
-          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+          className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm md:h-9 md:text-sm focus:outline-none focus:ring-1 focus:ring-ring"
         >
           <option value="">— No manager —</option>
           {managers.map((m) => (
@@ -199,15 +201,15 @@ export default function StoresPage() {
 
   return (
     <>
-      <main className="mx-auto max-w-6xl px-6 py-8">
-        <div className="mb-6 flex items-center justify-between">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold">Stores</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Manage your network of stores.
             </p>
           </div>
-          <Button onClick={() => { setCreateForm(EMPTY_FORM); setCreateError(""); setCreateOpen(true); }}>
+          <Button className="w-full sm:w-auto" onClick={() => { setCreateForm(EMPTY_FORM); setCreateError(""); setCreateOpen(true); }}>
             <Plus className="h-4 w-4" />
             Add Store
           </Button>
@@ -219,7 +221,33 @@ export default function StoresPage() {
           </div>
         )}
 
-        <div className="rounded-lg border bg-white shadow-sm">
+        <MobileList
+          items={stores}
+          loading={loading}
+          empty={<>No stores yet. Tap <strong>Add Store</strong> to get started.</>}
+          renderBody={(s) => (
+            <>
+              <p className="truncate font-medium">{s.name}</p>
+              <p className="text-sm text-muted-foreground">{s.address}</p>
+              {s.phone && (
+                <p className="text-sm">
+                  <a className="text-primary underline" href={`tel:${s.phone}`}>{s.phone}</a>
+                </p>
+              )}
+              {s.email && (
+                <p className="truncate text-sm">
+                  <a className="text-primary underline" href={`mailto:${s.email}`}>{s.email}</a>
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">Manager: {managerName(s.manager_id)}</p>
+            </>
+          )}
+          actions={(s) => (
+            <RowActions label={s.name} onEdit={() => openEdit(s)} onDelete={() => setDeleteTarget(s)} />
+          )}
+        />
+
+        <div className="hidden rounded-lg border bg-white shadow-sm md:block">
           <Table>
             <TableHeader>
               <TableRow>
@@ -257,25 +285,7 @@ export default function StoresPage() {
                     <TableCell className="text-muted-foreground">{s.email ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground">{managerName(s.manager_id)}</TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => openEdit(s)}
-                          title="Edit"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => setDeleteTarget(s)}
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                      <RowActions label={s.name} onEdit={() => openEdit(s)} onDelete={() => setDeleteTarget(s)} />
                     </TableCell>
                   </TableRow>
                 ))
