@@ -1,3 +1,5 @@
+import { request } from "./client";
+
 const API_BASE = "/api/v1/store-managers";
 
 function validateId(id) {
@@ -9,17 +11,7 @@ function validateId(id) {
 async function apiFetch(id = null, options = {}) {
   if (id !== null) validateId(id);
   const url = id !== null ? `${API_BASE}/${encodeURIComponent(id)}` : API_BASE;
-  const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  if (res.status === 204) return null;
-  const json = await res.json().catch(() => null);
-  if (json === null) {
-    throw new Error(`API unavailable or returned invalid data (HTTP ${res.status})`);
-  }
-  if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
-  return json;
+  return request(url, options);
 }
 
 export const listStoreManagers = () => apiFetch();

@@ -1,18 +1,8 @@
+import { request } from "./client";
+
 const API_BASE = "/api/v1/stores";
 
-async function apiFetch(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
-    ...options,
-  });
-  if (res.status === 204) return null;
-  const json = await res.json().catch(() => null);
-  if (json === null) {
-    throw new Error(`API unavailable or returned invalid data (HTTP ${res.status})`);
-  }
-  if (!res.ok) throw new Error(json.error || `HTTP ${res.status}`);
-  return json;
-}
+const apiFetch = (path, options) => request(`${API_BASE}${path}`, options);
 
 export const listStores = () => apiFetch("");
 

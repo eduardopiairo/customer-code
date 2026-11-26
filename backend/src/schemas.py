@@ -67,3 +67,9 @@ class StoreManagerOut(_Out):
     phone: str | None
     created_at: datetime
     updated_at: datetime
+
+
+class UserOut(_Out):
+    id: int
+    email: str
+    created_at: datetime

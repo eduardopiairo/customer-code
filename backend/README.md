@@ -50,12 +50,29 @@ The API will be available at `http://localhost:8000` (interactive docs at `/docs
 
 > The database tables are created automatically on startup via SQLAlchemy `create_all()`.
 
+## Authentication
+
+All `/api/v1/stores` and `/api/v1/store-managers` endpoints require a
+`Authorization: Bearer <token>` header. There is no public sign-up.
+
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `JWT_SECRET_KEY` | yes, with a real database | Signs login tokens. Generate with `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | first start only | Creates the first user if the `users` table is empty (password >= 10 chars recommended) |
+| `TOKEN_TTL_HOURS` | no | Token lifetime, default 8 |
+
+Set these in `backend/.env` locally and in the FastAPI Cloud environment for
+production. Once logged in, a user can add others with `POST /api/v1/users`.
+
 ## API endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/v1/health` | Health check |
 | GET | `/api/v1/details` | App details |
+| POST | `/api/v1/auth/login` | Log in, returns a token |
+| GET | `/api/v1/auth/me` | Current user |
+| POST | `/api/v1/users` | Create a user (auth required) |
 | GET | `/api/v1/stores` | List all stores |
 | POST | `/api/v1/stores` | Create a store |
 | GET | `/api/v1/stores/<id>` | Get a store |
